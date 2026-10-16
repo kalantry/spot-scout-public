@@ -95,7 +95,25 @@ class AppData {
 
   // Combine car fields into one string like "Silver Toyota Camry · ABC-1234".
   String get carInfo {
-    return "$carColor $carMake $carModel · $carLicensePlate".trim();
+    List<String> vehicle = [
+      carColor.trim(),
+      carMake.trim(),
+      carModel.trim(),
+    ].where((part) => part.isNotEmpty).toList();
+    String plate = carLicensePlate.trim();
+
+    if (vehicle.isEmpty || plate.isEmpty) {
+      return "";
+    }
+
+    return "${vehicle.join(" ")} · $plate";
+  }
+
+  bool get hasCompleteCarInfo {
+    return carColor.trim().isNotEmpty &&
+        carMake.trim().isNotEmpty &&
+        carModel.trim().isNotEmpty &&
+        carLicensePlate.trim().isNotEmpty;
   }
 
   // -- Parking requests --
@@ -108,6 +126,7 @@ class AppData {
 
   // Fill with 3 sample requests for testing.
   void initMock() {
+    _requests.clear();
     _requests.add(ParkingRequest(
       id: "1",
       address: "345 Chambers St",

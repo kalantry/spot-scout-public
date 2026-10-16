@@ -267,12 +267,11 @@ class _MapScreenState extends State<MapScreen> {
   // Turn a DateTime into "Wed 2:30 PM".
   String _formatTime(DateTime dt) {
     // Convert hour to 12-hour format.
-    String hourString;
-    if (dt.hour > 12) {
-      hourString = "${dt.hour - 12}";
-    } else {
-      hourString = "${dt.hour}";
+    int hour12 = dt.hour % 12;
+    if (hour12 == 0) {
+      hour12 = 12;
     }
+    String hourString = "$hour12";
 
     // AM or PM.
     String amPm = "AM";

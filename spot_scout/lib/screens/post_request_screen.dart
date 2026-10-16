@@ -29,8 +29,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
 
   // How many minutes between now and the target time.
   int _minutesAway() {
-    Duration diff = DateTime.now().difference(_combined());
-    return diff.inMinutes.abs();
+    Duration diff = _combined().difference(DateTime.now());
+    return diff.inMinutes;
   }
 
   // Is the target between 30 minutes and 4 hours away?
@@ -41,7 +41,8 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
 
   // Is the target less than 30 minutes away?
   bool _isTooSoon() {
-    return _minutesAway() < 30;
+    int mins = _minutesAway();
+    return mins >= 0 && mins < 30;
   }
 
   // Calculate how many points this request costs.
@@ -89,21 +90,23 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
   // Check the form and post the request if everything is valid.
   void _handlePost() {
     String address = _addressCtrl.text.trim();
+    DateTime target = _combined();
+    int cost = _cost();
 
     if (address.isEmpty) {
       _showMessage("Please enter a street address.", Colors.redAccent);
       return;
     }
 
-    if (_combined().isBefore(DateTime.now())) {
+    if (target.isBefore(DateTime.now())) {
       _showMessage("Target time must be in the future.", Colors.redAccent);
       return;
     }
 
     AppData data = AppData.instance;
-    if (data.points < _cost()) {
+    if (data.points < cost) {
       _showMessage(
-          "Not enough points. You have ${data.points}, need ${_cost()}.",
+          "Not enough points. You have ${data.points}, need $cost.",
           Colors.redAccent);
       return;
     }
@@ -111,9 +114,9 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
     ParkingRequest req = ParkingRequest(
       id: "",
       address: address,
-      targetTime: _combined(),
+      targetTime: target,
       walkDistance: _walkDistance,
-      pointsCost: _cost(),
+      pointsCost: cost,
       isLastMinute: _isLastMinute(),
       postedAt: DateTime.now(),
     );
@@ -123,7 +126,7 @@ class _PostRequestScreenState extends State<PostRequestScreen> {
     if (mounted) {
       setState(() {});
     }
-    _showMessage("Request posted for $address! Cost: ${_cost()} pts.", Colors.green);
+    _showMessage("Request posted for $address! Cost: $cost pts.", Colors.green);
   }
 
   // Show a small message at the bottom of the screen.

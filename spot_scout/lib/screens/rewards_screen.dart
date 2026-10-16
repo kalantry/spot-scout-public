@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
+import '../data.dart';
 //yea
 
 //=========================================================
@@ -47,7 +47,6 @@ class _MyRewardsWidgetState extends State<MyRewardsWidget> {
   // USER DATA
   //=========================================================
 
-  int points = 3192; // var used for points summary
   int streak = 3;// var used for streak
 
   //=========================================================
@@ -170,6 +169,7 @@ class _MyRewardsWidgetState extends State<MyRewardsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    AppData data = AppData.instance;
     // It is the method that creates and returns the user interface (UI) for that widget.
 
     return Scaffold(
@@ -255,7 +255,7 @@ class _MyRewardsWidgetState extends State<MyRewardsWidget> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "$points P",
+                        "${data.points} P",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 36,
@@ -445,6 +445,7 @@ class _MyRewardsWidgetState extends State<MyRewardsWidget> {
   Widget rewardCard({ // function that creates ui for each individual card
     required RewardItem reward,
   }) {
+    final int points = AppData.instance.points;
     final bool canRedeem = points >= reward.points && !reward.redeemed;
 
     return Card(
@@ -508,8 +509,7 @@ class _MyRewardsWidgetState extends State<MyRewardsWidget> {
               onPressed: canRedeem
                   ? () {
                       setState(() {
-                        points -= reward.points;  //subtract from user points
-
+                        AppData.instance.deductPoints(reward.points);
                         reward.redeemed = true;
                       });
 
@@ -580,17 +580,6 @@ class _MyRewardsWidgetState extends State<MyRewardsWidget> {
 
     super.dispose();
   }
-}
-//=========================================================
-// WIDGET PREVIEW
-//=========================================================
-
-@Preview()
-Widget myRewardsWidgetPreview() {
-  return const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: MyRewardsWidget(),
-  );
 }
 
 // RewardItem is a custom class I made to create different rewards.

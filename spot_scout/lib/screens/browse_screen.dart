@@ -54,7 +54,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
     for (ParkingRequest r in all) {
       if (r.status == "open") {
         open.add(r);
-      } else if (r.status == "claimed" || r.status == "verified") {
+      } else if ((r.status == "claimed" || r.status == "verified") &&
+          r.claimedBy == "local") {
         mine.add(r);
       }
     }
@@ -130,18 +131,18 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   // Claim an open request.
   void _handleClaim(ParkingRequest request) {
-    String carInfo = AppData.instance.carInfo;
-    if (carInfo.isEmpty) {
+    AppData data = AppData.instance;
+    if (!data.hasCompleteCarInfo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Set your car info in Profile first."),
+          content: Text("Complete color, make, model, and plate in Profile first."),
           backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    String error = AppData.instance.claimRequest(request.id, carInfo);
+    String error = data.claimRequest(request.id, data.carInfo);
     if (error.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error), backgroundColor: Colors.redAccent),
@@ -345,12 +346,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   // Format a DateTime into something like "Wed 2:30 PM".
   String _formatTime(DateTime dt) {
-    String hourString;
-    if (dt.hour > 12) {
-      hourString = "${dt.hour - 12}";
-    } else {
-      hourString = "${dt.hour}";
+    int hour12 = dt.hour % 12;
+    if (hour12 == 0) {
+      hour12 = 12;
     }
+    String hourString = "$hour12";
 
     String amPm = "AM";
     if (dt.hour >= 12) {
